@@ -22,7 +22,7 @@
         }
 
         .gallery-container {
-            width: 100%;
+            width: 100vw;
             height: 100vh;
             position: relative;
             overflow: hidden;
@@ -32,7 +32,7 @@
             display: flex;
             flex-direction: row;
             gap: 0;
-            animation: scrollLeft 585s linear infinite;
+            animation: scrollLeft 585s linear forwards;
         }
 
         .scroll-wrapper.paused {
@@ -41,6 +41,8 @@
 
         .image-container {
             height: 100vh;
+            min-width: 100vw;
+            flex-shrink: 0;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -49,18 +51,9 @@
 
         .image-container img {
             height: 100vh;
-            width: auto;
-            object-fit: contain;
+            width: 100vw;
+            object-fit: cover;
             display: block;
-        }
-
-        /* Black dividing lines: between 2-3 and 5-6 */
-        .image-container:nth-child(2) {
-            border-right: 20px solid black;
-        }
-
-        .image-container:nth-child(5) {
-            border-right: 20px solid black;
         }
 
         .controls {
@@ -104,6 +97,24 @@
             z-index: 100;
         }
 
+        .paused-indicator {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            display: none;
+        }
+
+        .paused-indicator.show {
+            display: block;
+        }
+
         @keyframes scrollLeft {
             0% {
                 transform: translateX(0);
@@ -139,7 +150,7 @@
     <div class="gallery-container">
         <div class="scroll-wrapper" id="scrollWrapper">
             <div class="image-container">
-                <img src="Assests/1 The Role of Serfs & Medieval Far Tools.png" alt="The Role of Serfs & Medieval Far Tools">
+                <img src="Assests/1 The Role of Serfs & Medieval Far Tools .png" alt="Image 1">
             </div>
             <div class="image-container">
                 <img src="Assests/2 Manor (Donovan).png" alt="Manor (Donovan)">
@@ -181,6 +192,7 @@
     </div>
 
     <div class="speed-indicator" id="speedIndicator">Speed: Normal</div>
+    <div class="paused-indicator" id="pausedIndicator">Paused</div>
 
     <div class="controls">
         <button onclick="restartScroll()">Restart</button>
@@ -204,6 +216,87 @@
 
         let presentationMode = false;
         let waitingForClick = false;
+        let speedBoostActive = false;
+        
+        // Auto-scroll variables
+        let currentImageIndex = 0;
+        let autoScrollActive = false;
+        const totalImages = 13;
+        const pauseTime = 30000; // 30 seconds
+
+        
+        // Auto-scroll function
+        function autoScroll() {
+            if (!autoScrollActive || isPaused || presentationMode) return;
+            
+            if (currentImageIndex < totalImages) {
+                // Scroll to the current image
+                const targetX = -currentImageIndex * window.innerWidth;
+                scrollWrapper.style.transition = 'transform 4s ease-in-out';
+                scrollWrapper.style.transform = `translateX(${targetX}px)`;
+                scrollWrapper.style.animation = 'none';
+                
+                // For slides 8-10 (indices 7-9), do continuous scroll
+                if (currentImageIndex === 7) {
+                    // Start continuous scroll from slide 8 to 10
+                    setTimeout(() => {
+                        const endX = -9 * window.innerWidth;
+                        scrollWrapper.style.transition = 'transform 30s linear';
+                        scrollWrapper.style.transform = `translateX(${endX}px)`;
+                        
+                        // After continuous scroll, stop at slide 10 for 5 seconds
+                        setTimeout(() => {
+                            currentImageIndex = 10;
+                            setTimeout(() => {
+                                autoScroll();
+                            }, 5000);
+                        }, 30000);
+                    }, 4000); // Wait for initial transition
+                } else if (currentImageIndex >= 8 && currentImageIndex <= 9) {
+                    // Skip these as they're handled by the continuous scroll
+                    return;
+                } else {
+                    // Normal pause for other slides
+                    setTimeout(() => {
+                        currentImageIndex++;
+                        autoScroll();
+                    }, pauseTime);
+                }
+            } else {
+                // Restart from beginning
+                currentImageIndex = 0;
+                autoScroll();
+            }
+        }
+
+
+        // Monitor animation progress to speed up between images 8-10
+        function checkAnimationProgress() {
+            const computedStyle = window.getComputedStyle(scrollWrapper);
+            const transform = computedStyle.transform;
+            
+            if (transform !== 'none') {
+                const matrix = new DOMMatrix(transform);
+                const translateX = matrix.m41;
+                const totalWidth = window.innerWidth * 13; // 13 images
+                const progress = Math.abs(translateX) / totalWidth;
+                
+                // Images 8-10 represent roughly 7/13 to 10/13 of the animation
+                const startBoost = 7 / 13;
+                const endBoost = 10 / 13;
+                
+                if (progress >= startBoost && progress <= endBoost && !speedBoostActive && !isPaused) {
+                    speedBoostActive = true;
+                    scrollWrapper.style.animationDuration = '200s'; // Much faster
+                } else if ((progress < startBoost || progress > endBoost) && speedBoostActive && !isPaused) {
+                    speedBoostActive = false;
+                    scrollWrapper.style.animationDuration = speeds[currentSpeed];
+                }
+            }
+        }
+
+        // Check progress every 100ms
+        setInterval(checkAnimationProgress, 100);
 
         // Keyboard shortcut: Press 'P' for presentation mode
         document.addEventListener('keydown', (e) => {
@@ -212,6 +305,37 @@
             }
             if (e.key === 'Escape' && presentationMode) {
                 exitPresentationMode();
+            }
+            if (e.key === ' ') {
+                e.preventDefault();
+                isPaused = !isPaused;
+                const pausedIndicator = document.getElementById('pausedIndicator');
+                if (isPaused) {
+                    scrollWrapper.classList.add('paused');
+                    pausedIndicator.classList.add('show');
+                } else {
+                    scrollWrapper.classList.remove('paused');
+                    pausedIndicator.classList.remove('show');
+                    autoScroll();
+                }
+            }
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                if (currentImageIndex < totalImages - 1) {
+                    currentImageIndex++;
+                    const targetX = -currentImageIndex * window.innerWidth;
+                    scrollWrapper.style.transition = 'transform 3s ease-in-out';
+                    scrollWrapper.style.transform = `translateX(${targetX}px)`;
+                }
+            }
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                if (currentImageIndex > 0) {
+                    currentImageIndex--;
+                    const targetX = -currentImageIndex * window.innerWidth;
+                    scrollWrapper.style.transition = 'transform 3s ease-in-out';
+                    scrollWrapper.style.transform = `translateX(${targetX}px)`;
+                }
             }
         });
 
@@ -225,27 +349,35 @@
         function enterPresentationMode() {
             presentationMode = true;
             waitingForClick = true;
+            autoScrollActive = false;
+            currentImageIndex = 0;
             document.body.classList.add('presentation-mode', 'waiting');
             scrollWrapper.classList.add('paused');
             scrollWrapper.style.animation = 'none';
+            scrollWrapper.style.transform = 'translateX(0)';
         }
 
         function startPresentation() {
             waitingForClick = false;
             document.body.classList.remove('waiting');
-            changeSpeed('normal');
             scrollWrapper.classList.remove('paused');
+            autoScrollActive = false;
+            currentImageIndex = 0;
+            scrollWrapper.style.transform = 'translateX(0)';
         }
 
         function exitPresentationMode() {
             presentationMode = false;
             waitingForClick = false;
+            autoScrollActive = false;
+            currentImageIndex = 0;
+            scrollWrapper.style.transform = 'translateX(0)';
             document.body.classList.remove('presentation-mode', 'waiting');
         }
 
         function changeSpeed(speed) {
             currentSpeed = speed;
-            scrollWrapper.style.animation = `scrollLeft ${speeds[speed]} linear infinite`;
+            scrollWrapper.style.animation = `scrollLeft ${speeds[speed]} linear forwards`;
             speedIndicator.textContent = `Speed: ${speed.charAt(0).toUpperCase() + speed.slice(1)}`;
             
             if (isPaused) {
@@ -254,31 +386,32 @@
         }
 
         function toggleScroll(button) {
+            const pausedIndicator = document.getElementById('pausedIndicator');
             if (isPaused) {
                 scrollWrapper.classList.remove('paused');
+                pausedIndicator.classList.remove('show');
                 button.textContent = 'Pause';
                 isPaused = false;
+                autoScroll(); // Resume auto-scroll
             } else {
                 scrollWrapper.classList.add('paused');
+                pausedIndicator.classList.add('show');
                 button.textContent = 'Resume';
                 isPaused = true;
             }
         }
 
         function restartScroll() {
+            currentImageIndex = 0;
+            scrollWrapper.style.transition = 'transform 0.5s ease-in-out';
+            scrollWrapper.style.transform = 'translateX(0)';
             scrollWrapper.style.animation = 'none';
             setTimeout(() => {
-                scrollWrapper.style.animation = `scrollLeft ${speeds[currentSpeed]} linear infinite`;
-                if (isPaused) {
-                    scrollWrapper.classList.add('paused');
-                }
-            }, 10);
+                autoScroll();
+            }, 100);
         }
 
-        // Reset animation when it completes to create infinite loop
-        scrollWrapper.addEventListener('animationiteration', () => {
-            // Animation will automatically restart
-        });
+
     </script>
 </body>
 </html>
