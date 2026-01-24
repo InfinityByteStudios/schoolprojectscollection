@@ -324,7 +324,7 @@
                 if (currentImageIndex < totalImages - 1) {
                     currentImageIndex++;
                     const targetX = -currentImageIndex * window.innerWidth;
-                    scrollWrapper.style.transition = 'transform 3s ease-in-out';
+                    scrollWrapper.style.transition = 'transform 8s ease-in-out';
                     scrollWrapper.style.transform = `translateX(${targetX}px)`;
                 }
             }
@@ -333,7 +333,43 @@
                 if (currentImageIndex > 0) {
                     currentImageIndex--;
                     const targetX = -currentImageIndex * window.innerWidth;
-                    scrollWrapper.style.transition = 'transform 3s ease-in-out';
+                    scrollWrapper.style.transition = 'transform 8s ease-in-out';
+                    scrollWrapper.style.transform = `translateX(${targetX}px)`;
+                }
+            }
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (currentImageIndex < totalImages - 1) {
+                    currentImageIndex++;
+                    const targetX = -currentImageIndex * window.innerWidth;
+                    scrollWrapper.style.transition = 'transform 8s ease-in-out';
+                    scrollWrapper.style.transform = `translateX(${targetX}px)`;
+                }
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (currentImageIndex > 0) {
+                    currentImageIndex--;
+                    const targetX = -currentImageIndex * window.innerWidth;
+                    scrollWrapper.style.transition = 'transform 8s ease-in-out';
+                    scrollWrapper.style.transform = `translateX(${targetX}px)`;
+                }
+            }
+            if (e.key === 'PageDown') {
+                e.preventDefault();
+                if (currentImageIndex < totalImages - 1) {
+                    currentImageIndex++;
+                    const targetX = -currentImageIndex * window.innerWidth;
+                    scrollWrapper.style.transition = 'transform 8s ease-in-out';
+                    scrollWrapper.style.transform = `translateX(${targetX}px)`;
+                }
+            }
+            if (e.key === 'PageUp') {
+                e.preventDefault();
+                if (currentImageIndex > 0) {
+                    currentImageIndex--;
+                    const targetX = -currentImageIndex * window.innerWidth;
+                    scrollWrapper.style.transition = 'transform 8s ease-in-out';
                     scrollWrapper.style.transform = `translateX(${targetX}px)`;
                 }
             }
