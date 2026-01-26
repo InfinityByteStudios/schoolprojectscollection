@@ -251,6 +251,39 @@
 
         // Start auto-play when page loads
         autoPlay();
+
+        // Auto-enter fullscreen (present mode) on page load
+        function enterFullscreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+        }
+
+        // Exit fullscreen when ESC is pressed
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' || event.key === 'Esc') {
+                if (document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) { /* Safari */
+                        document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) { /* IE11 */
+                        document.msExitFullscreen();
+                    }
+                }
+            }
+        });
+
+        // Automatically enter fullscreen when page loads
+        window.addEventListener('load', function() {
+            // Small delay to ensure the page is fully loaded
+            setTimeout(enterFullscreen, 100);
+        });
     </script>
 </body>
 </html>
