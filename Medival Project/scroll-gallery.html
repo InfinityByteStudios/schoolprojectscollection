@@ -120,7 +120,7 @@
                 transform: translateX(0);
             }
             100% {
-                transform: translateX(-1300vw);
+                transform: translateX(-1400vw);
             }
         }
 
@@ -150,43 +150,46 @@
     <div class="gallery-container">
         <div class="scroll-wrapper" id="scrollWrapper">
             <div class="image-container">
-                <img src="Assests/1 The Role of Serfs & Medieval Far Tools .png" alt="Image 1">
+                <img src="Assests/1 The Role of Serfs & Medieval Farm Tools.png" alt="The Role of Serfs & Medieval Farm Tools">
             </div>
             <div class="image-container">
                 <img src="Assests/2 Manor (Donovan).png" alt="Manor (Donovan)">
             </div>
             <div class="image-container">
-                <img src="Assests/3 Crime and Punishment(Hassan).png" alt="Crime and Punishment(Hassan)">
+                <img src="Assests/3 Jobs.png" alt="Jobs">
             </div>
             <div class="image-container">
-                <img src="Assests/4 Worst Jobs.png" alt="Worst Jobs">
+                <img src="Assests/4 Crime and Punishment(Hassan).png" alt="Crime and Punishment (Hassan)">
             </div>
             <div class="image-container">
-                <img src="Assests/5.png" alt="Image 5">
+                <img src="Assests/5 Worst Jobs.png" alt="Worst Jobs">
             </div>
             <div class="image-container">
                 <img src="Assests/6.png" alt="Image 6">
             </div>
             <div class="image-container">
-                <img src="Assests/7 Castles and Fortification.png" alt="Castles and Fortification">
+                <img src="Assests/7 Medieval Entertainment and Sports.png" alt="Medieval Entertainment and Sports">
             </div>
             <div class="image-container">
-                <img src="Assests/8 Crusades Journey.png" alt="Crusades Journey">
+                <img src="Assests/8 Castles and Fortification.png" alt="Castles and Fortification">
             </div>
             <div class="image-container">
-                <img src="Assests/9 Crusades Fight.png" alt="Crusades Fight">
+                <img src="Assests/9 Crusades Journey.png" alt="Crusades Journey">
             </div>
             <div class="image-container">
-                <img src="Assests/10 Crusades Leaving.png" alt="Crusades Leaving">
+                <img src="Assests/10 Crusades Fight.png" alt="Crusades Fight">
             </div>
             <div class="image-container">
-                <img src="Assests/11 Children.png" alt="Children">
+                <img src="Assests/11 Crusades Leaving.png" alt="Crusades Leaving">
             </div>
             <div class="image-container">
-                <img src="Assests/12 Black Death.png" alt="Black Death">
+                <img src="Assests/12 Children.png" alt="Children">
             </div>
             <div class="image-container">
-                <img src="Assests/13 Church Lutaaya.png" alt="Church Lutaaya">
+                <img src="Assests/13 Black Death.png" alt="Black Death">
+            </div>
+            <div class="image-container">
+                <img src="Assests/14 Church Lutaaya.png" alt="Church Lutaaya">
             </div>
         </div>
     </div>
@@ -300,7 +303,8 @@
 
         // Keyboard shortcut: Press 'P' for presentation mode
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'p' || e.key === 'P') {
+            if (e.key === 'p' || e.key === 'P' || e.key === 'F5') {
+                e.preventDefault();
                 enterPresentationMode();
             }
             if (e.key === 'Escape' && presentationMode) {
@@ -323,54 +327,42 @@
                 e.preventDefault();
                 if (currentImageIndex < totalImages - 1) {
                     currentImageIndex++;
-                    const targetX = -currentImageIndex * window.innerWidth;
-                    scrollWrapper.style.transition = 'transform 8s ease-in-out';
-                    scrollWrapper.style.transform = `translateX(${targetX}px)`;
+                    navigateToSlide(currentImageIndex);
                 }
             }
             if (e.key === 'ArrowLeft') {
                 e.preventDefault();
                 if (currentImageIndex > 0) {
                     currentImageIndex--;
-                    const targetX = -currentImageIndex * window.innerWidth;
-                    scrollWrapper.style.transition = 'transform 8s ease-in-out';
-                    scrollWrapper.style.transform = `translateX(${targetX}px)`;
+                    navigateToSlide(currentImageIndex);
                 }
             }
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 if (currentImageIndex < totalImages - 1) {
                     currentImageIndex++;
-                    const targetX = -currentImageIndex * window.innerWidth;
-                    scrollWrapper.style.transition = 'transform 8s ease-in-out';
-                    scrollWrapper.style.transform = `translateX(${targetX}px)`;
+                    navigateToSlide(currentImageIndex);
                 }
             }
             if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 if (currentImageIndex > 0) {
                     currentImageIndex--;
-                    const targetX = -currentImageIndex * window.innerWidth;
-                    scrollWrapper.style.transition = 'transform 8s ease-in-out';
-                    scrollWrapper.style.transform = `translateX(${targetX}px)`;
+                    navigateToSlide(currentImageIndex);
                 }
             }
             if (e.key === 'PageDown') {
                 e.preventDefault();
                 if (currentImageIndex < totalImages - 1) {
                     currentImageIndex++;
-                    const targetX = -currentImageIndex * window.innerWidth;
-                    scrollWrapper.style.transition = 'transform 8s ease-in-out';
-                    scrollWrapper.style.transform = `translateX(${targetX}px)`;
+                    navigateToSlide(currentImageIndex);
                 }
             }
             if (e.key === 'PageUp') {
                 e.preventDefault();
                 if (currentImageIndex > 0) {
                     currentImageIndex--;
-                    const targetX = -currentImageIndex * window.innerWidth;
-                    scrollWrapper.style.transition = 'transform 8s ease-in-out';
-                    scrollWrapper.style.transform = `translateX(${targetX}px)`;
+                    navigateToSlide(currentImageIndex);
                 }
             }
         });
@@ -445,6 +437,28 @@
             setTimeout(() => {
                 autoScroll();
             }, 100);
+        }
+
+        function navigateToSlide(slideIndex) {
+            // Special handling for slide 9 in presentation mode
+            if (presentationMode && slideIndex === 8) {
+                // Slide 9 (index 8) - auto scroll to slide 11 over 45 seconds
+                const startX = -8 * window.innerWidth;
+                const endX = -10 * window.innerWidth; // Slide 11 (index 10)
+                
+                scrollWrapper.style.transition = 'transform 45s linear';
+                scrollWrapper.style.transform = `translateX(${endX}px)`;
+                
+                // Update currentImageIndex after the transition
+                setTimeout(() => {
+                    currentImageIndex = 10;
+                }, 45000);
+            } else {
+                // Normal navigation
+                const targetX = -slideIndex * window.innerWidth;
+                scrollWrapper.style.transition = 'transform 2s ease-in-out';
+                scrollWrapper.style.transform = `translateX(${targetX}px)`;
+            }
         }
 
 
