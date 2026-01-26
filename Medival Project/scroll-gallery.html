@@ -224,7 +224,7 @@
         // Auto-scroll variables
         let currentImageIndex = 0;
         let autoScrollActive = false;
-        const totalImages = 13;
+        const totalImages = 14;
         const pauseTime = 30000; // 30 seconds
 
         
@@ -442,21 +442,28 @@
         function navigateToSlide(slideIndex) {
             // Special handling for slide 9 in presentation mode
             if (presentationMode && slideIndex === 8) {
-                // Slide 9 (index 8) - auto scroll to slide 11 over 45 seconds
+                // Slide 9 (index 8) - first quickly jump to slide 9, then auto scroll to slide 11
                 const startX = -8 * window.innerWidth;
                 const endX = -10 * window.innerWidth; // Slide 11 (index 10)
                 
-                scrollWrapper.style.transition = 'transform 45s linear';
-                scrollWrapper.style.transform = `translateX(${endX}px)`;
+                // Quick transition to slide 9
+                scrollWrapper.style.transition = 'transform 1s ease-in-out';
+                scrollWrapper.style.transform = `translateX(${startX}px)`;
                 
-                // Update currentImageIndex after the transition
+                // Then start the slow auto-scroll to slide 11
                 setTimeout(() => {
-                    currentImageIndex = 10;
-                }, 45000);
+                    scrollWrapper.style.transition = 'transform 45s linear';
+                    scrollWrapper.style.transform = `translateX(${endX}px)`;
+                    
+                    // Update currentImageIndex after the transition
+                    setTimeout(() => {
+                        currentImageIndex = 10;
+                    }, 45000);
+                }, 1000);
             } else {
                 // Normal navigation
                 const targetX = -slideIndex * window.innerWidth;
-                scrollWrapper.style.transition = 'transform 2s ease-in-out';
+                scrollWrapper.style.transition = 'transform 4s ease-in-out';
                 scrollWrapper.style.transform = `translateX(${targetX}px)`;
             }
         }
